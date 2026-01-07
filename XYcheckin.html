@@ -94,7 +94,7 @@
                 }
                 setTimeout(() => btns.forEach(b => b.disabled = false), 2000);
             }, (err) => {
-                status.innerText = "GPS 定位失敗，請授權位置權限";
+                status.innerText = "GPS 定位失敗，���授權位置權限";
                 btns.forEach(b => b.disabled = false);
             }, { enableHighAccuracy: true });
         };
@@ -111,12 +111,12 @@
                 </svg>
             </div>
             <h1 class="text-2xl font-black text-slate-800">軒揚數理 教師打卡系統</h1>
-            <p id="userName" class="text-slate-400 text-sm mt-1 tracking-tight">自動排錯模組啟動</p>
+            <p id="userName" class="text-slate-400 text-sm mt-1 tracking-tight">自動排錯模組���動</p>
         </div>
 
         <div class="space-y-3 mb-8">
-            <button id="workBtn" onclick="doPunch('IN')" disabled class="btn-punch w-full py-4 rounded-xl bg-blue-600 text-white font-bold shadow-lg active:scale-95 transition-all">上班簽到</[...]
-            <button id="offBtn" onclick="doPunch('OUT')" disabled class="btn-punch w-full py-4 rounded-xl bg-slate-800 text-white font-bold shadow-lg active:scale-95 transition-all">下班簽退<[...]
+            <button id="workBtn" onclick="doPunch('IN')" disabled class="btn-punch w-full py-4 rounded-xl bg-blue-600 text-white font-bold shadow-lg active:scale-95 transition-all">上班簽到</button>
+            <button id="offBtn" onclick="doPunch('OUT')" disabled class="btn-punch w-full py-4 rounded-xl bg-slate-800 text-white font-bold shadow-lg active:scale-95 transition-all">下班簽退</button>
         </div>
 
         <div id="statusText" class="text-xs text-slate-500 bg-slate-50 py-6 px-4 rounded-2xl min-h-[6rem] flex flex-col items-center justify-center border border-slate-100">
