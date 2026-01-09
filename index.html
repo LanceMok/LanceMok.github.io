@@ -117,8 +117,8 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzVEW712woUR-kIIRMgAI8oavHxwe2u9mqlmC5FaxnKBx6YWVhILVGNF-UK6jmh3L8l/exec";
-        const ADMIN_PASSWORD = "1234"; // 在此修改您的管理密碼
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzUcUnYvCgvU008Tjhu5zyipW6nu_KZxWNqsVwE7atMkkqQpKdgSkD1OwBo1AWAw9A0/exec";
+        const ADMIN_PASSWORD = "860201"; // 在此修改您的管理密碼
         
         const PRESET_LOCS = ['文星文理補習班（大社吉的堡）', '鳳翔文理補習班', '麥克亞綸文理補習班'];
         let activeLocs = JSON.parse(localStorage.getItem('sy_locs_v2')) || PRESET_LOCS;
@@ -140,7 +140,7 @@
         function showFeedback(teacher, title) {
             const overlay = document.getElementById('successOverlay');
             document.getElementById('successTitle').innerText = title;
-            document.getElementById('successTeacher').innerText = teacher + " 老師，資料已同步";
+            document.getElementById('successTeacher').innerText = teacher + " G'Day, Fella!";
             overlay.classList.remove('hidden');
             setTimeout(() => overlay.classList.add('hidden'), 3000);
         }
