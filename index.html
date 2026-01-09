@@ -30,7 +30,6 @@
             <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
             <span id="statusText" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">定位初始化...</span>
         </div>
-        <!-- 管理員按鈕 -->
         <button id="navAdminBtn" class="w-10 h-10 glass-effect rounded-full flex items-center justify-center text-slate-500 border border-white shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
         </button>
@@ -60,12 +59,41 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-5 pt-4">
-                <button id="punchInBtn" class="punch-btn bg-emerald-500 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">上班打卡</button>
-                <button id="punchOutBtn" class="punch-btn bg-slate-900 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">下班打卡</button>
+            <div class="pt-4 space-y-4">
+                <!-- 補打卡文字連結 -->
+                <div class="text-center px-2">
+                    <p class="text-sm font-bold text-slate-500">
+                        如需補打卡，請洽 
+                        <a href="https://line.me/R/ti/p/@your_line_id" target="_blank" class="text-blue-600 underline decoration-2 underline-offset-4">
+                            「軒揚師培教育」官方帳號
+                        </a>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5">
+                    <button id="punchInBtn" class="punch-btn bg-emerald-500 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">上班打卡</button>
+                    <button id="punchOutBtn" class="punch-btn bg-slate-900 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">下班打卡</button>
+                </div>
             </div>
         </div>
     </main>
+
+    <!-- 管理端驗證 -->
+    <section id="authView" class="hidden fixed inset-0 z-50 bg-white/95 backdrop-blur-md flex items-center justify-center p-8">
+        <div class="w-full max-w-sm text-center">
+            <h3 class="font-black text-2xl mb-8 uppercase tracking-widest text-slate-400">管理端驗證</h3>
+            <div id="passwordSection" class="space-y-4">
+                <input id="adminPassword" type="password" placeholder="輸入管理密碼" class="w-full p-5 bg-slate-100 rounded-2xl text-center text-xl font-bold border-2 border-transparent focus:border-blue-500 outline-none transition-all">
+                <button id="verifyPwBtn" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-black">登入後台</button>
+            </div>
+            <div id="adminContent" class="hidden flex flex-col gap-4 mt-4">
+                <p class="text-emerald-600 font-bold mb-2">驗證成功</p>
+                <a id="sheetLink" href="https://docs.google.com/spreadsheets/d/1TW_qsvU_uN7N3K6sFDI-qkEqWvVK9ZIJGXCZbA6U668/edit?gid=0#gid=0" target="_blank" class="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black shadow-lg text-center">開啟 Google 試算表</a>
+                <button id="logoutBtn" class="w-full py-3 text-slate-400 text-sm font-bold">登出並關閉</button>
+            </div>
+            <button id="authBackBtn" class="mt-8 text-slate-400 font-bold">返回打卡頁面</button>
+        </div>
+    </section>
 
     <!-- 新增地點 Modal -->
     <div id="locModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-sm">
@@ -77,43 +105,11 @@
                 <button id="confirmLocBtn" class="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black">新增</button>
             </div>
         </div>
-        
-                <!-- 補打卡文字連結 -->
-                <div class="text-center px-2">
-                    <p class="text-sm font-bold text-slate-500">
-                        如需補打卡，請洽 
-                        <a href="https://line.me/R/ti/p/@your_line_id" target="_blank" class="text-blue-600 underline decoration-2 underline-offset-4">
-                            「軒揚師培教育」官方帳號
-                        </a>
-                    </p>
-                </div>
+    </div>
 
-    </main>
-
-    <!-- 管理介面 (含密碼驗證) -->
-    <section id="authView" class="hidden fixed inset-0 z-50 bg-white/95 backdrop-blur-md flex items-center justify-center p-8">
-        <div class="w-full max-w-sm text-center">
-            <h3 class="font-black text-2xl mb-8 uppercase tracking-widest text-slate-400">管理端驗證</h3>
-            
-            <div id="passwordSection" class="space-y-4">
-                <input id="adminPassword" type="password" placeholder="輸入管理密碼" class="w-full p-5 bg-slate-100 rounded-2xl text-center text-xl font-bold border-2 border-transparent focus:border-blue-500 outline-none transition-all">
-                <button id="verifyPwBtn" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-black">登入後台</button>
-            </div>
-
-            <div id="adminContent" class="hidden flex flex-col gap-4 mt-4">
-                <p class="text-emerald-600 font-bold mb-2">驗證成功</p>
-                <!-- 已填入您提供的試算表連結 -->
-                <a id="sheetLink" href="https://docs.google.com/spreadsheets/d/1TW_qsvU_uN7N3K6sFDI-qkEqWvVK9ZIJGXCZbA6U668/edit?gid=0#gid=0" target="_blank" class="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black shadow-lg text-center">開啟 Google 試算表</a>
-                <button id="logoutBtn" class="w-full py-3 text-slate-400 text-sm font-bold">登出並關閉</button>
-            </div>
-            
-            <button id="authBackBtn" class="mt-8 text-slate-400 font-bold">返回打卡頁面</button>
-        </div>
-    </section>
-
-    <!-- 成功與反饋提示 -->
+    <!-- 成功與載入遮罩 (省略部分細節保持程式碼精簡) -->
     <div id="successOverlay" class="hidden fixed inset-0 z-[200] flex items-center justify-center px-8 bg-slate-900/60 backdrop-blur-md">
-        <div id="successCard" class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center shadow-2xl transition-all">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center shadow-2xl">
             <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-emerald-100 text-emerald-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" /></svg>
             </div>
@@ -121,15 +117,13 @@
             <p id="successTeacher" class="text-xl font-bold text-slate-600"></p>
         </div>
     </div>
-
-    <!-- 載入中遮罩 -->
     <div id="loadingOverlay" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-white/50 backdrop-blur-sm">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
     </div>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbzBIUrIlNyOdNgJxccb2ov_WK2JNiyOoldj9t7jjvqPkQp9bZuQo39jE7r6o4OQjPQt/exec";
-        const ADMIN_PASSWORD = "860201"; // 在此修改您的管理密碼
+        const ADMIN_PASSWORD = "860201"; 
         
         const PRESET_LOCS = ['文星文理補習班（大社吉的堡）', '鳳翔文理補習班', '麥克亞綸文理補習班'];
         let activeLocs = JSON.parse(localStorage.getItem('sy_locs_v2')) || PRESET_LOCS;
@@ -144,9 +138,7 @@
             if (selectedValue) select.value = selectedValue;
         }
 
-        function showLoading(show) {
-            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
-        }
+        function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('hidden', !show); }
 
         function showFeedback(teacher, title) {
             const overlay = document.getElementById('successOverlay');
@@ -168,12 +160,10 @@
             nameEl.classList.remove('border-rose-400');
 
             showLoading(true);
-
             const payload = {
                 teacher: name,
                 location: document.getElementById('locationSelect').value,
                 type: type,
-                clientTime: new Date().toLocaleString('zh-TW', { hour12: false }),
                 lat: currentGeo ? currentGeo.lat : "無定位",
                 lng: currentGeo ? currentGeo.lng : "無定位",
                 accuracy: currentGeo ? currentGeo.accuracy : "無定位"
@@ -181,13 +171,10 @@
 
             try {
                 await fetch(GAS_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    cache: 'no-cache',
+                    method: 'POST', mode: 'no-cors', cache: 'no-cache',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
                 showLoading(false);
                 showFeedback(name, `${type}成功`);
                 localStorage.setItem('sy_name_last', name);
@@ -197,32 +184,21 @@
             }
         }
 
-        // 管理密碼驗證邏輯
         document.getElementById('verifyPwBtn').onclick = () => {
             const input = document.getElementById('adminPassword').value;
             if (input === ADMIN_PASSWORD) {
-                hide('passwordSection');
-                show('adminContent');
-                document.getElementById('adminPassword').value = "";
+                hide('passwordSection'); show('adminContent');
             } else {
                 alert("密碼錯誤！");
-                document.getElementById('adminPassword').value = "";
             }
         };
 
         document.getElementById('logoutBtn').onclick = () => {
-            hide('adminContent');
-            show('passwordSection');
-            hide('authView');
+            hide('adminContent'); show('passwordSection'); hide('authView');
         };
 
-        // 事件監聽
         document.getElementById('navAdminBtn').onclick = () => show('authView');
-        document.getElementById('authBackBtn').onclick = () => {
-            hide('authView');
-            hide('adminContent');
-            show('passwordSection');
-        };
+        document.getElementById('authBackBtn').onclick = () => hide('authView');
         document.getElementById('addLocBtn').onclick = () => show('locModal');
         document.getElementById('closeLocBtn').onclick = () => hide('locModal');
         
@@ -240,18 +216,16 @@
         document.getElementById('punchInBtn').onclick = () => handlePunch('上班打卡');
         document.getElementById('punchOutBtn').onclick = () => handlePunch('下班打卡');
 
-        // 定位
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(pos => {
                 currentGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
                 document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]";
                 document.getElementById('statusText').innerText = `定位正常 (${currentGeo.accuracy}m)`;
-            }, (err) => {
+            }, () => {
                 document.getElementById('statusText').innerText = "定位失敗，請開啟GPS";
             }, { enableHighAccuracy: true });
         }
 
-        // 初始化
         refreshLocUI();
         const last = localStorage.getItem('sy_name_last');
         if (last) document.getElementById('teacherName').value = last;
