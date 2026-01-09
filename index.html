@@ -58,7 +58,6 @@
             <div class="space-y-2 relative">
                 <label class="px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">Teacher Name</label>
                 <input id="teacherName" type="text" placeholder="輸入姓名" class="w-full glass-effect p-6 rounded-[2rem] text-xl font-bold border-2 border-transparent shadow-xl focus:bg-white transition-all outline-none">
-                <!-- 欄位下方提示 -->
                 <div id="nameError" class="hidden absolute left-5 -bottom-6 text-rose-500 text-xs font-bold flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                     請輸入教師姓名
@@ -92,7 +91,7 @@
 
     <!-- 打卡成功跳出卡片 -->
     <div id="successOverlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-8 bg-slate-900/40 backdrop-blur-sm">
-        <div id="successCard" class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center shadow-2xl relative overflow-hidden">
+        <div id="successCard" class="bg-white w-full max-sm rounded-[3rem] p-10 text-center shadow-2xl relative overflow-hidden">
             <div class="absolute top-0 inset-x-0 h-2 bg-emerald-500"></div>
             <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" /></svg>
@@ -121,7 +120,7 @@
             <h2 class="text-4xl font-black italic tracking-tighter text-slate-800 underline decoration-blue-500">LOGS</h2>
             <div class="flex gap-2">
                 <button onclick="openEditModal(null)" class="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-lg">補登</button>
-                <button onclick="switchView('punch')" class="px-4 py-2 bg-slate-800 text-white text-[10px] font-black rounded-full">登出</button>
+                <button onclick="handleLogout()" class="px-4 py-2 bg-slate-800 text-white text-[10px] font-black rounded-full">登出</button>
             </div>
         </div>
         <div id="teacherTabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-4 border-b"></div>
@@ -180,9 +179,10 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const PATH = 'sy-production-geo-v1';
+        const collectionRef = collection(db, 'artifacts', PATH, 'public', 'data', 'attendance');
 
         let user = null;
-        let isVerified = false;
+        let isVerified = sessionStorage.getItem('sy_admin_verified') === 'true';
         let logs = [];
         let filterT = 'ALL';
         let currentGeo = null;
@@ -200,14 +200,20 @@
             startGeo();
             const last = localStorage.getItem('sy_name_geo');
             if(last) document.getElementById('teacherName').value = last;
+
+            if(isVerified) {
+                switchView('admin');
+            }
         }
 
         function startGeo() {
             if(navigator.geolocation) {
                 navigator.geolocation.watchPosition(pos => {
                     currentGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
-                    document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]";
-                    document.getElementById('statusText').innerText = `定位中 (±${currentGeo.accuracy}m)`;
+                    const dot = document.getElementById('statusDot');
+                    const txt = document.getElementById('statusText');
+                    if(dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]";
+                    if(txt) txt.innerText = `定位中 (±${currentGeo.accuracy}m)`;
                 }, null, { enableHighAccuracy: true });
             }
         }
@@ -218,7 +224,12 @@
             document.getElementById('editLoc').innerHTML = options;
         }
 
-        window.toggleLocModal = (s) => document.getElementById('locModal').classList.toggle('hidden', !s);
+        window.toggleLocModal = (s) => {
+            const modal = document.getElementById('locModal');
+            if(s) modal.classList.remove('hidden');
+            else modal.classList.add('hidden');
+        };
+
         window.confirmAddLoc = () => {
             const v = document.getElementById('newLocInput').value.trim();
             if(v && !activeLocs.includes(v)) {
@@ -226,12 +237,11 @@
                 localStorage.setItem('sy_locs_geo', JSON.stringify(activeLocs));
                 refreshLocUI();
             }
-            document.getElementById('locationSelect').value = v || activeLocs[0];
+            if(v) document.getElementById('locationSelect').value = v;
             toggleLocModal(false);
             document.getElementById('newLocInput').value = "";
         };
 
-        // 打卡邏輯
         window.handlePunch = async (type) => {
             const nameEl = document.getElementById('teacherName');
             const errorEl = document.getElementById('nameError');
@@ -247,12 +257,11 @@
                 errorEl.classList.add('hidden');
             }
 
-            // 先顯示成功卡片
             showSuccessCard(name, type);
 
             try {
                 const now = new Date();
-                await addDoc(collection(db, 'artifacts', PATH, 'public', 'data', 'attendance'), {
+                await addDoc(collectionRef, {
                     teacher: name,
                     location: document.getElementById('locationSelect').value,
                     type,
@@ -283,7 +292,6 @@
             }, 2500);
         }
 
-        // 後台邏輯
         window.switchView = (v) => {
             ['punchView', 'authView', 'adminView'].forEach(id => document.getElementById(id).classList.add('hidden'));
             if(v === 'admin' && !isVerified) document.getElementById('authView').classList.remove('hidden');
@@ -293,13 +301,21 @@
         window.verifyAdmin = () => {
             if(document.getElementById('adminPass').value === "860201") { 
                 isVerified = true; 
+                sessionStorage.setItem('sy_admin_verified', 'true');
                 switchView('admin'); 
                 document.getElementById('adminPass').value = "";
+                renderAdmin();
             } else alert("密碼錯誤");
         };
 
+        window.handleLogout = () => {
+            isVerified = false;
+            sessionStorage.removeItem('sy_admin_verified');
+            switchView('punch');
+        };
+
         function startSync() {
-            onSnapshot(collection(db, 'artifacts', PATH, 'public', 'data', 'attendance'), (snap) => {
+            onSnapshot(collectionRef, (snap) => {
                 logs = [];
                 snap.forEach(d => logs.push({id: d.id, ...d.data()}));
                 logs.sort((a,b) => new Date(b.clientTime) - new Date(a.clientTime));
@@ -348,7 +364,10 @@
             document.getElementById('editModal').classList.remove('hidden');
         };
 
-        window.closeEditModal = () => document.getElementById('editModal').classList.add('hidden');
+        window.closeEditModal = () => {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('hidden');
+        };
 
         window.doSave = async () => {
             const id = document.getElementById('editId').value;
@@ -359,19 +378,35 @@
                 clientTime: new Date(document.getElementById('editTime').value).toISOString()
             };
             if(!payload.teacher) return alert("請輸入姓名");
-            if(id) await updateDoc(doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id), payload);
-            else {
-                payload.timestamp = serverTimestamp();
-                payload.geo = "手動補登";
-                await addDoc(collection(db, 'artifacts', PATH, 'public', 'data', 'attendance'), payload);
+            
+            try {
+                if(id) {
+                    await updateDoc(doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id), payload);
+                } else {
+                    payload.timestamp = serverTimestamp();
+                    payload.geo = "手動補登";
+                    await addDoc(collectionRef, payload);
+                }
+                // 明確調用關閉
+                window.closeEditModal();
+            } catch (e) {
+                console.error("Save error:", e);
+                alert("儲存失敗，請重試");
             }
-            closeEditModal();
         };
 
         window.doDelete = async () => {
+            const id = document.getElementById('editId').value;
+            if(!id) return;
             if(confirm("確定刪除紀錄？")) {
-                await deleteDoc(doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', document.getElementById('editId').value));
-                closeEditModal();
+                try {
+                    await deleteDoc(doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id));
+                    // 明確調用關閉
+                    window.closeEditModal();
+                } catch (e) {
+                    console.error("Delete error:", e);
+                    alert("刪除失敗");
+                }
             }
         };
 
