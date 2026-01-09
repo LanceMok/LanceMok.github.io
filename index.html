@@ -9,7 +9,6 @@
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; -webkit-tap-highlight-color: transparent; }
         .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        <div class="text-center px-2 mb-4"><p class="text-sm font-bold text-slate-500">如需補打卡，請洽 <a href="https://lin.ee/Z36rJeq" target="_blank" class="text-blue-600 underline decoration-2 underline-offset-4">「軒揚師培教育」官方帳號</a></p></div>
         .punch-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .punch-btn:active { transform: scale(0.95); opacity: 0.9; }
         .gradient-bg { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
@@ -78,7 +77,24 @@
                 <button id="confirmLocBtn" class="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black">新增</button>
             </div>
         </div>
-    </div>
+            <div class="pt-4 space-y-4">
+                <!-- 補打卡文字連結 -->
+                <div class="text-center px-2">
+                    <p class="text-sm font-bold text-slate-500">
+                        如需補打卡，請洽 
+                        <a href="https://line.me/R/ti/p/@your_line_id" target="_blank" class="text-blue-600 underline decoration-2 underline-offset-4">
+                            「軒揚師培教育」官方帳號
+                        </a>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5">
+                    <button id="punchInBtn" class="punch-btn bg-emerald-500 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">上班打卡</button>
+                    <button id="punchOutBtn" class="punch-btn bg-slate-900 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">下班打卡</button>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <!-- 管理介面 (含密碼驗證) -->
     <section id="authView" class="hidden fixed inset-0 z-50 bg-white/95 backdrop-blur-md flex items-center justify-center p-8">
