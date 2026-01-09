@@ -21,32 +21,27 @@
             0% { opacity: 1; transform: scale(1) translateY(0); }
             100% { opacity: 0; transform: scale(0.9) translateY(-20px); }
         }
-        .animate-modal-in { animation: modalIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .animate-modal-out { animation: modalOut 0.3s ease-in forwards; }
+        .animate-modal-in { animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .animate-modal-out { animation: modalOut 0.2s ease-in forwards; }
         
-        .error-shake { animation: shake 0.4s ease-in-out; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        button svg, button span { pointer-events: none; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen text-slate-900">
 
-    <!-- 頂部導覽列 -->
+    <!-- 狀態列 -->
     <nav class="fixed top-0 inset-x-0 z-40 px-6 py-6 flex justify-between items-center">
         <div class="flex items-center gap-2 glass-effect px-4 py-2 rounded-full border border-white shadow-sm">
             <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
-            <span id="statusText" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">定位掃描中</span>
+            <span id="statusText" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">定位初始化...</span>
         </div>
-        <button onclick="switchView('admin')" class="w-10 h-10 glass-effect rounded-full flex items-center justify-center text-slate-500 border border-white shadow-sm active:bg-white transition-colors">
+        <button id="navAdminBtn" class="w-10 h-10 glass-effect rounded-full flex items-center justify-center text-slate-500 border border-white shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
         </button>
     </nav>
 
-    <!-- 打卡主畫面 -->
+    <!-- 主打卡畫面 -->
     <main id="punchView" class="max-w-md mx-auto pt-28 pb-10 px-6 space-y-10">
         <div class="text-center space-y-1">
             <h1 class="text-5xl font-black tracking-tighter text-slate-800">軒揚數理</h1>
@@ -54,109 +49,96 @@
         </div>
 
         <div class="space-y-6">
-            <!-- 姓名輸入 -->
             <div class="space-y-2 relative">
                 <label class="px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">Teacher Name</label>
-                <input id="teacherName" type="text" placeholder="輸入姓名" class="w-full glass-effect p-6 rounded-[2rem] text-xl font-bold border-2 border-transparent shadow-xl focus:bg-white transition-all outline-none">
-                <div id="nameError" class="hidden absolute left-5 -bottom-6 text-rose-500 text-xs font-bold flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                    請輸入教師姓名
-                </div>
+                <input id="teacherName" type="text" placeholder="輸入姓名" class="w-full glass-effect p-6 rounded-[2rem] text-xl font-bold border-2 border-transparent shadow-xl outline-none">
+                <div id="nameError" class="hidden absolute left-5 -bottom-6 text-rose-500 text-xs font-bold">請輸入教師姓名</div>
             </div>
 
-            <!-- 地點選擇 -->
             <div class="space-y-2">
                 <label class="px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">Location</label>
                 <div class="flex gap-3">
                     <select id="locationSelect" class="flex-1 glass-effect p-6 rounded-[2rem] text-lg font-bold border border-white shadow-inner outline-none appearance-none bg-transparent"></select>
-                    <button onclick="toggleLocModal(true)" class="w-16 h-16 bg-blue-600 text-white rounded-[1.8rem] flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+                    <button id="addLocBtn" class="w-16 h-16 bg-blue-600 text-white rounded-[1.8rem] flex items-center justify-center shadow-lg active:scale-90 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
                     </button>
                 </div>
             </div>
 
-            <!-- 打卡按鈕 -->
             <div class="grid grid-cols-1 gap-5 pt-4">
-                <button onclick="handlePunch('上班打卡')" class="punch-btn bg-emerald-500 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl flex flex-col items-center">
-                    <span>上班打卡</span>
-                    <span class="text-[10px] opacity-60 tracking-widest mt-1 uppercase">Start Duty</span>
-                </button>
-                <button onclick="handlePunch('下班打卡')" class="punch-btn bg-slate-900 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl flex flex-col items-center">
-                    <span>下班打卡</span>
-                    <span class="text-[10px] opacity-60 tracking-widest mt-1 uppercase">End Session</span>
-                </button>
+                <button id="punchInBtn" class="punch-btn bg-emerald-500 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">上班打卡</button>
+                <button id="punchOutBtn" class="punch-btn bg-slate-900 text-white p-10 rounded-[2.5rem] font-black text-2xl shadow-xl">下班打卡</button>
             </div>
         </div>
     </main>
 
-    <!-- 打卡成功跳出卡片 -->
-    <div id="successOverlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-8 bg-slate-900/40 backdrop-blur-sm">
-        <div id="successCard" class="bg-white w-full max-sm rounded-[3rem] p-10 text-center shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 inset-x-0 h-2 bg-emerald-500"></div>
-            <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" /></svg>
-            </div>
-            <h3 id="successTitle" class="text-3xl font-black text-slate-800 mb-2 tracking-tighter"></h3>
-            <p id="successTeacher" class="text-xl font-bold text-slate-600 mb-6"></p>
-            <div class="px-6 py-2 bg-slate-100 rounded-full inline-block font-mono text-sm text-slate-400" id="successTime"></div>
+    <!-- 成功與反饋提示 -->
+    <div id="successOverlay" class="hidden fixed inset-0 z-[200] flex items-center justify-center px-8 bg-slate-900/60 backdrop-blur-md">
+        <div id="successCard" class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center shadow-2xl transition-all">
+            <div id="successIcon" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"></div>
+            <h3 id="successTitle" class="text-3xl font-black text-slate-800 mb-2"></h3>
+            <p id="successTeacher" class="text-xl font-bold text-slate-600"></p>
         </div>
     </div>
 
-    <!-- 管理員登入 -->
+    <!-- 管理登入介面 -->
     <section id="authView" class="hidden fixed inset-0 z-50 bg-white/95 backdrop-blur-md flex items-center justify-center p-8">
-        <div class="w-full max-w-sm p-10 text-center">
-            <h3 class="font-black text-2xl mb-8 uppercase tracking-tighter">Admin Login</h3>
-            <input id="adminPass" type="password" placeholder="輸入密碼" class="w-full bg-slate-100 p-6 rounded-2xl text-center text-4xl font-mono tracking-widest outline-none border-2 focus:border-blue-500 mb-8">
+        <div class="w-full max-w-sm text-center">
+            <h3 class="font-black text-2xl mb-8 uppercase tracking-widest text-slate-400">Admin Authentication</h3>
+            <input id="adminPass" type="password" placeholder="密碼" class="w-full bg-slate-100 p-6 rounded-2xl text-center text-4xl outline-none mb-8">
             <div class="flex gap-4">
-                <button onclick="switchView('punch')" class="flex-1 font-bold text-slate-400">返回</button>
-                <button onclick="verifyAdmin()" class="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black shadow-lg">進入後台</button>
+                <button id="authBackBtn" class="flex-1 font-bold text-slate-400">返回</button>
+                <button id="authLoginBtn" class="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black shadow-lg">登入</button>
             </div>
         </div>
     </section>
 
-    <!-- 管理後台列表 -->
+    <!-- 後台管理頁面 -->
     <section id="adminView" class="hidden max-w-2xl mx-auto pt-28 p-6 pb-32">
         <div class="flex justify-between items-end mb-8">
-            <h2 class="text-4xl font-black italic tracking-tighter text-slate-800 underline decoration-blue-500">LOGS</h2>
+            <h2 class="text-4xl font-black italic text-slate-800 underline decoration-blue-500">HISTORY</h2>
             <div class="flex gap-2">
-                <button onclick="openEditModal(null)" class="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-lg">補登</button>
-                <button onclick="handleLogout()" class="px-4 py-2 bg-slate-800 text-white text-[10px] font-black rounded-full">登出</button>
+                <button id="adminManualAddBtn" class="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-lg">補登紀錄</button>
+                <button id="adminLogoutBtn" class="px-4 py-2 bg-slate-800 text-white text-[10px] font-black rounded-full">登出</button>
             </div>
         </div>
-        <div id="teacherTabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-4 border-b"></div>
+        <div id="teacherTabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-4 border-b border-slate-200"></div>
         <div id="logList" class="space-y-4 py-6"></div>
     </section>
 
-    <!-- 補登/編輯 Modal -->
+    <!-- 編輯 Modal -->
     <div id="editModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/80">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 space-y-4 shadow-2xl">
-            <h3 id="editModalTitle" class="text-xl font-black">編輯打卡</h3>
+        <div id="editModalContent" class="bg-white w-full max-w-md rounded-[2.5rem] p-8 space-y-4 shadow-2xl">
+            <h3 id="editModalTitle" class="text-xl font-black">編輯紀錄</h3>
             <input id="editId" type="hidden">
-            <input id="editName" type="text" placeholder="老師姓名" class="w-full p-4 bg-slate-50 rounded-xl border font-bold outline-none focus:border-blue-500">
-            <select id="editLoc" class="w-full p-4 bg-slate-50 rounded-xl border font-bold"></select>
-            <div class="grid grid-cols-2 gap-2">
-                <select id="editType" class="w-full p-4 bg-slate-50 rounded-xl border font-bold">
-                    <option value="上班打卡">上班打卡</option>
-                    <option value="下班打卡">下班打卡</option>
-                </select>
-                <input id="editTime" type="datetime-local" class="w-full p-4 bg-slate-50 rounded-xl border text-xs font-bold">
+            <div class="space-y-4">
+                <input id="editName" type="text" placeholder="老師姓名" class="w-full p-4 bg-slate-50 rounded-xl border font-bold outline-none">
+                <select id="editLoc" class="w-full p-4 bg-slate-50 rounded-xl border font-bold"></select>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="editType" class="w-full p-4 bg-slate-50 rounded-xl border font-bold">
+                        <option value="上班打卡">上班打卡</option>
+                        <option value="下班打卡">下班打卡</option>
+                    </select>
+                    <input id="editTime" type="datetime-local" class="w-full p-4 bg-slate-50 rounded-xl border text-xs font-bold">
+                </div>
             </div>
-            <div class="flex flex-col gap-2 pt-4">
-                <button onclick="doSave()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-black">儲存修改</button>
-                <button id="delBtn" onclick="doDelete()" class="w-full py-2 text-rose-500 font-bold">刪除此紀錄</button>
-                <button onclick="closeEditModal()" class="w-full py-2 text-slate-400">取消</button>
+            <div id="editBtnGroup" class="flex flex-col gap-2 pt-4">
+                <button id="doSaveBtn" class="w-full py-4 bg-blue-600 text-white rounded-xl font-black shadow-lg">儲存修改</button>
+                <button id="preDeleteBtn" class="w-full py-2 text-rose-500 font-bold">刪除紀錄</button>
+                <button id="confirmDeleteBtn" class="hidden w-full py-4 bg-rose-600 text-white rounded-xl font-black shadow-lg">確認刪除 (不可還原)</button>
+                <button id="closeEditBtn" class="w-full py-2 text-slate-400">取消</button>
             </div>
         </div>
     </div>
 
-    <!-- 地點管理 Modal -->
+    <!-- 地點新增 Modal -->
     <div id="locModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/80">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center space-y-4">
-            <h3 class="text-xl font-black">新增教學地點</h3>
-            <input id="newLocInput" type="text" placeholder="輸入地點名稱" class="w-full p-4 bg-slate-50 rounded-xl border text-center font-bold outline-none">
+        <div id="locModalContent" class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center space-y-4 shadow-2xl">
+            <h3 class="text-xl font-black text-slate-800">新增地點</h3>
+            <input id="newLocInput" type="text" placeholder="地點名稱" class="w-full p-4 bg-slate-50 rounded-xl border text-center font-bold outline-none">
             <div class="flex gap-2">
-                <button onclick="toggleLocModal(false)" class="flex-1 text-slate-400 font-bold">取消</button>
-                <button onclick="confirmAddLoc()" class="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black">確認新增</button>
+                <button id="closeLocBtn" class="flex-1 text-slate-400 font-bold">取消</button>
+                <button id="confirmLocBtn" class="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black">新增</button>
             </div>
         </div>
     </div>
@@ -179,238 +161,251 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const PATH = 'sy-production-geo-v1';
-        const collectionRef = collection(db, 'artifacts', PATH, 'public', 'data', 'attendance');
+        const attendanceRef = collection(db, 'artifacts', PATH, 'public', 'data', 'attendance');
 
-        let user = null;
-        let isVerified = sessionStorage.getItem('sy_admin_verified') === 'true';
         let logs = [];
         let filterT = 'ALL';
         let currentGeo = null;
         const PRESET = ['文星文理補習班（大社吉的堡）', '鳳翔文理補習班', '麥克亞綸文理補習班'];
         let activeLocs = JSON.parse(localStorage.getItem('sy_locs_geo')) || PRESET;
 
-        async function init() {
-            try {
-                const cred = await signInAnonymously(auth);
-                user = cred.user;
-                startSync();
-            } catch(e) { console.error("Auth failed:", e); }
-            
-            refreshLocUI();
-            startGeo();
-            const last = localStorage.getItem('sy_name_geo');
-            if(last) document.getElementById('teacherName').value = last;
-
-            if(isVerified) {
-                switchView('admin');
+        // --- UI 控制 ---
+        const hide = (id) => document.getElementById(id)?.classList.add('hidden');
+        const show = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('hidden');
+            const content = document.getElementById(id + 'Content');
+            if (content) {
+                content.classList.remove('animate-modal-out');
+                content.classList.add('animate-modal-in');
             }
-        }
-
-        function startGeo() {
-            if(navigator.geolocation) {
-                navigator.geolocation.watchPosition(pos => {
-                    currentGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
-                    const dot = document.getElementById('statusDot');
-                    const txt = document.getElementById('statusText');
-                    if(dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]";
-                    if(txt) txt.innerText = `定位中 (±${currentGeo.accuracy}m)`;
-                }, null, { enableHighAccuracy: true });
-            }
-        }
-
-        function refreshLocUI() {
-            const options = activeLocs.map(l => `<option value="${l}">${l}</option>`).join('');
-            document.getElementById('locationSelect').innerHTML = options;
-            document.getElementById('editLoc').innerHTML = options;
-        }
-
-        window.toggleLocModal = (s) => {
-            const modal = document.getElementById('locModal');
-            if(s) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
         };
 
-        window.confirmAddLoc = () => {
+        function switchView(viewName) {
+            ['punchView', 'authView', 'adminView'].forEach(hide);
+            const isVerified = sessionStorage.getItem('sy_admin_verified') === 'true';
+            if (viewName === 'admin' && !isVerified) show('authView');
+            else show(viewName + 'View');
+        }
+
+        function refreshLocUI(selectedValue = null) {
+            const options = activeLocs.map(l => `<option value="${l}">${l}</option>`).join('');
+            const m = document.getElementById('locationSelect');
+            const e = document.getElementById('editLoc');
+            m.innerHTML = options;
+            e.innerHTML = options;
+            if (selectedValue) {
+                m.value = selectedValue;
+                e.value = selectedValue;
+            }
+        }
+
+        function showFeedback(teacher, title, mode = "success") {
+            const overlay = document.getElementById('successOverlay');
+            const card = document.getElementById('successCard');
+            const iconWrap = document.getElementById('successIcon');
+            
+            iconWrap.className = `w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${mode === 'delete' ? 'bg-rose-100 text-rose-500' : 'bg-emerald-100 text-emerald-500'}`;
+            iconWrap.innerHTML = mode === 'delete' ? 
+                `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>` :
+                `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" /></svg>`;
+
+            document.getElementById('successTitle').innerText = title;
+            document.getElementById('successTeacher').innerText = teacher ? `${teacher} 老師` : "";
+            
+            overlay.classList.remove('hidden');
+            card.classList.add('animate-modal-in');
+            
+            setTimeout(() => {
+                card.classList.replace('animate-modal-in', 'animate-modal-out');
+                setTimeout(() => { 
+                    overlay.classList.add('hidden'); 
+                    card.classList.remove('animate-modal-out'); 
+                }, 300);
+            }, 1500);
+        }
+
+        // --- 點擊綁定 ---
+        document.getElementById('navAdminBtn').onclick = () => switchView('admin');
+        document.getElementById('authBackBtn').onclick = () => switchView('punch');
+        document.getElementById('addLocBtn').onclick = () => show('locModal');
+        document.getElementById('closeLocBtn').onclick = () => hide('locModal');
+        document.getElementById('adminLogoutBtn').onclick = () => { sessionStorage.removeItem('sy_admin_verified'); location.reload(); };
+        document.getElementById('adminManualAddBtn').onclick = () => openEditModal(null);
+        document.getElementById('closeEditBtn').onclick = () => hide('editModal');
+
+        document.getElementById('confirmLocBtn').onclick = () => {
             const v = document.getElementById('newLocInput').value.trim();
-            if(v && !activeLocs.includes(v)) {
+            if (v && !activeLocs.includes(v)) {
                 activeLocs.push(v);
                 localStorage.setItem('sy_locs_geo', JSON.stringify(activeLocs));
-                refreshLocUI();
+                refreshLocUI(v);
             }
-            if(v) document.getElementById('locationSelect').value = v;
-            toggleLocModal(false);
+            hide('locModal');
             document.getElementById('newLocInput').value = "";
         };
 
-        window.handlePunch = async (type) => {
-            const nameEl = document.getElementById('teacherName');
-            const errorEl = document.getElementById('nameError');
-            const name = nameEl.value.trim();
+        document.getElementById('authLoginBtn').onclick = () => {
+            if (document.getElementById('adminPass').value === "860201") {
+                sessionStorage.setItem('sy_admin_verified', 'true');
+                switchView('admin');
+                renderAdmin();
+            } else alert("密碼錯誤");
+        };
+
+        document.getElementById('punchInBtn').onclick = () => handlePunch('上班打卡');
+        document.getElementById('punchOutBtn').onclick = () => handlePunch('下班打卡');
+
+        document.getElementById('doSaveBtn').onclick = async () => {
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('editName').value.trim();
+            if (!name) return alert("請輸入姓名");
             
-            if(!name) {
-                nameEl.classList.add('border-rose-400', 'error-shake');
-                errorEl.classList.remove('hidden');
-                setTimeout(() => nameEl.classList.remove('error-shake'), 400);
-                return;
-            } else {
-                nameEl.classList.remove('border-rose-400');
-                errorEl.classList.add('hidden');
-            }
+            const payload = {
+                teacher: name,
+                location: document.getElementById('editLoc').value,
+                type: document.getElementById('editType').value,
+                clientTime: new Date(document.getElementById('editTime').value).toISOString()
+            };
 
-            showSuccessCard(name, type);
-
+            hide('editModal');
             try {
-                const now = new Date();
-                await addDoc(collectionRef, {
+                if (id) {
+                    const docRef = doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id);
+                    await updateDoc(docRef, payload);
+                    showFeedback(name, "修改成功");
+                } else {
+                    payload.timestamp = serverTimestamp();
+                    payload.geo = "手動補登";
+                    await addDoc(attendanceRef, payload);
+                    showFeedback(name, "補登成功");
+                }
+            } catch (e) { console.error(e); }
+        };
+
+        // --- 刪除紀錄新邏輯 ---
+        document.getElementById('preDeleteBtn').onclick = () => {
+            document.getElementById('preDeleteBtn').classList.add('hidden');
+            document.getElementById('doSaveBtn').classList.add('hidden');
+            document.getElementById('confirmDeleteBtn').classList.remove('hidden');
+        };
+
+        document.getElementById('confirmDeleteBtn').onclick = async () => {
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('editName').value;
+            if (!id) return;
+            
+            try {
+                // 1. 先隱藏 Modal
+                hide('editModal');
+                
+                // 2. 構建文檔引用路徑
+                const docRef = doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id);
+                
+                // 3. 執行刪除
+                await deleteDoc(docRef);
+                
+                // 4. 顯示成功提示
+                showFeedback(name, "紀錄已刪除", "delete");
+            } catch (e) {
+                console.error("刪除失敗:", e);
+                alert("刪除失敗，請檢查網路狀態");
+            }
+        };
+
+        // --- 核心打卡 ---
+        async function handlePunch(type) {
+            const nameEl = document.getElementById('teacherName');
+            const name = nameEl.value.trim();
+            if (!name) { nameEl.classList.add('border-rose-400'); show('nameError'); return; }
+            nameEl.classList.remove('border-rose-400'); hide('nameError');
+            
+            showFeedback(name, `${type}成功`);
+            try {
+                await addDoc(attendanceRef, {
                     teacher: name,
                     location: document.getElementById('locationSelect').value,
                     type,
                     geo: currentGeo || "無定位資訊",
                     timestamp: serverTimestamp(),
-                    clientTime: now.toISOString()
+                    clientTime: new Date().toISOString()
                 });
                 localStorage.setItem('sy_name_geo', name);
-            } catch(e) { console.error("Firestore error:", e); }
-        };
-
-        function showSuccessCard(name, type) {
-            const overlay = document.getElementById('successOverlay');
-            const card = document.getElementById('successCard');
-            const now = new Date();
-            
-            document.getElementById('successTitle').innerText = `${type}完成`;
-            document.getElementById('successTeacher').innerText = `${name} 老師 辛苦了`;
-            document.getElementById('successTime').innerText = now.toLocaleString('zh-TW', { hour12: false });
-            
-            overlay.classList.remove('hidden');
-            card.classList.remove('animate-modal-out');
-            card.classList.add('animate-modal-in');
-            
-            setTimeout(() => {
-                card.classList.replace('animate-modal-in', 'animate-modal-out');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }, 2500);
+            } catch (e) { console.error(e); }
         }
 
-        window.switchView = (v) => {
-            ['punchView', 'authView', 'adminView'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            if(v === 'admin' && !isVerified) document.getElementById('authView').classList.remove('hidden');
-            else document.getElementById(v + 'View').classList.remove('hidden');
-        };
-
-        window.verifyAdmin = () => {
-            if(document.getElementById('adminPass').value === "860201") { 
-                isVerified = true; 
-                sessionStorage.setItem('sy_admin_verified', 'true');
-                switchView('admin'); 
-                document.getElementById('adminPass').value = "";
-                renderAdmin();
-            } else alert("密碼錯誤");
-        };
-
-        window.handleLogout = () => {
-            isVerified = false;
-            sessionStorage.removeItem('sy_admin_verified');
-            switchView('punch');
-        };
-
-        function startSync() {
-            onSnapshot(collectionRef, (snap) => {
-                logs = [];
-                snap.forEach(d => logs.push({id: d.id, ...d.data()}));
-                logs.sort((a,b) => new Date(b.clientTime) - new Date(a.clientTime));
-                renderAdmin();
-            });
+        function openEditModal(id) {
+            const data = id ? logs.find(l => l.id === id) : null;
+            document.getElementById('editId').value = id || '';
+            document.getElementById('editModalTitle').innerText = id ? "編輯紀錄" : "補登紀錄";
+            document.getElementById('editName').value = data ? data.teacher : "";
+            document.getElementById('editLoc').value = data ? data.location : activeLocs[0];
+            document.getElementById('editType').value = data ? data.type : "上班打卡";
+            
+            const d = data ? new Date(data.clientTime) : new Date();
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            document.getElementById('editTime').value = d.toISOString().slice(0, 16);
+            
+            // 重設按鈕狀態
+            document.getElementById('preDeleteBtn').classList.toggle('hidden', !id);
+            document.getElementById('doSaveBtn').classList.remove('hidden');
+            document.getElementById('confirmDeleteBtn').classList.add('hidden');
+            
+            show('editModal');
         }
 
         function renderAdmin() {
             const list = document.getElementById('logList');
-            if(!list) return;
+            if (!list) return;
             const tNames = [...new Set(logs.map(l => l.teacher))];
             
-            document.getElementById('teacherTabs').innerHTML = `<button onclick="setF('ALL')" class="whitespace-nowrap px-4 py-2 text-sm font-black ${filterT==='ALL'?'text-blue-600 border-b-2 border-blue-600':'text-slate-400'}">全部</button>` + 
-                tNames.map(t => `<button onclick="setF('${t}')" class="whitespace-nowrap px-4 py-2 text-sm font-black ${filterT===t?'text-blue-600 border-b-2 border-blue-600':'text-slate-400'}">${t}</button>`).join('');
+            document.getElementById('teacherTabs').innerHTML = `<button data-t="ALL" class="tab-btn whitespace-nowrap px-4 py-2 text-sm font-black ${filterT === 'ALL' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}">全部</button>` + 
+                tNames.map(t => `<button data-t="${t}" class="tab-btn whitespace-nowrap px-4 py-2 text-sm font-black ${filterT === t ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}">${t}</button>`).join('');
             
+            document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => { filterT = b.dataset.t; renderAdmin(); });
+
             const filtered = filterT === 'ALL' ? logs : logs.filter(l => l.teacher === filterT);
-            list.innerHTML = filtered.map(log => {
-                const geo = log.geo;
-                const geoLink = (geo && geo.lat) ? `<a href="https://www.google.com/maps?q=${geo.lat},${geo.lng}" target="_blank" class="text-[10px] text-blue-500 underline font-bold">查看地圖 (±${geo.accuracy}m)</a>` : `<span class="text-[10px] text-slate-300">無定位</span>`;
-                return `
+            list.innerHTML = filtered.map(log => `
                 <div class="glass-effect p-6 rounded-[2rem] border border-white shadow-sm flex justify-between items-center">
-                    <div>
-                        <div class="font-black text-slate-800">${log.teacher} <span class="text-xs font-normal text-slate-400">${log.type}</span></div>
-                        <div class="text-[10px] text-slate-400 font-bold uppercase">${log.location}</div>
-                        <div class="text-[9px] text-slate-300">${new Date(log.clientTime).toLocaleString('zh-TW')}</div>
-                        ${geoLink}
+                    <div class="space-y-1">
+                        <div class="font-black text-slate-800">${log.teacher} <span class="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">${log.type}</span></div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">${log.location}</div>
+                        <div class="text-[9px] text-slate-300 font-mono">${new Date(log.clientTime).toLocaleString('zh-TW', {hour12:false})}</div>
                     </div>
-                    <button onclick="openEditModal('${log.id}')" class="text-xs text-blue-500 font-black">修正</button>
-                </div>`;
-            }).join('');
+                    <button class="edit-trigger text-xs text-blue-500 font-black px-4 py-3 bg-blue-50 rounded-2xl active:scale-95 transition-transform" data-id="${log.id}">修正</button>
+                </div>`).join('');
+            
+            document.querySelectorAll('.edit-trigger').forEach(b => b.onclick = () => openEditModal(b.dataset.id));
         }
 
-        window.setF = (t) => { filterT = t; renderAdmin(); };
-
-        window.openEditModal = (id) => {
-            const data = id ? logs.find(l => l.id === id) : null;
-            document.getElementById('editId').value = id || '';
-            document.getElementById('editModalTitle').innerText = id ? "修正打卡" : "手動補登";
-            document.getElementById('editName').value = data ? data.teacher : "";
-            document.getElementById('editLoc').value = data ? data.location : activeLocs[0];
-            document.getElementById('editType').value = data ? data.type : "上班打卡";
-            const time = data ? new Date(data.clientTime) : new Date();
-            time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
-            document.getElementById('editTime').value = time.toISOString().slice(0,16);
-            document.getElementById('delBtn').classList.toggle('hidden', !id);
-            document.getElementById('editModal').classList.remove('hidden');
-        };
-
-        window.closeEditModal = () => {
-            const modal = document.getElementById('editModal');
-            modal.classList.add('hidden');
-        };
-
-        window.doSave = async () => {
-            const id = document.getElementById('editId').value;
-            const payload = {
-                teacher: document.getElementById('editName').value.trim(),
-                location: document.getElementById('editLoc').value,
-                type: document.getElementById('editType').value,
-                clientTime: new Date(document.getElementById('editTime').value).toISOString()
-            };
-            if(!payload.teacher) return alert("請輸入姓名");
-            
+        // --- 初始化 ---
+        (async () => {
             try {
-                if(id) {
-                    await updateDoc(doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id), payload);
-                } else {
-                    payload.timestamp = serverTimestamp();
-                    payload.geo = "手動補登";
-                    await addDoc(collectionRef, payload);
-                }
-                // 明確調用關閉
-                window.closeEditModal();
-            } catch (e) {
-                console.error("Save error:", e);
-                alert("儲存失敗，請重試");
-            }
-        };
+                await signInAnonymously(auth);
+                onSnapshot(attendanceRef, (snap) => {
+                    logs = [];
+                    snap.forEach(d => logs.push({ id: d.id, ...d.data() }));
+                    logs.sort((a, b) => new Date(b.clientTime) - new Date(a.clientTime));
+                    if (sessionStorage.getItem('sy_admin_verified') === 'true') renderAdmin();
+                });
 
-        window.doDelete = async () => {
-            const id = document.getElementById('editId').value;
-            if(!id) return;
-            if(confirm("確定刪除紀錄？")) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id));
-                    // 明確調用關閉
-                    window.closeEditModal();
-                } catch (e) {
-                    console.error("Delete error:", e);
-                    alert("刪除失敗");
+                if (navigator.geolocation) {
+                    navigator.geolocation.watchPosition(pos => {
+                        currentGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
+                        const dot = document.getElementById('statusDot');
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]";
+                        document.getElementById('statusText').innerText = `定位中 (誤差${currentGeo.accuracy}m)`;
+                    });
                 }
-            }
-        };
 
-        init();
+                refreshLocUI();
+                const last = localStorage.getItem('sy_name_geo');
+                if (last) document.getElementById('teacherName').value = last;
+                if (sessionStorage.getItem('sy_admin_verified') === 'true') switchView('admin');
+
+            } catch (e) { console.error("初始化失敗:", e); }
+        })();
     </script>
 </body>
 </html>
