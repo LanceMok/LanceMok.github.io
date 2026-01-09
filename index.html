@@ -145,7 +145,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -161,7 +161,9 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const PATH = 'sy-production-geo-v1';
-        const attendanceRef = collection(db, 'artifacts', PATH, 'public', 'data', 'attendance');
+        
+        // 關鍵修正：確保所有地方使用的路徑完全一致
+        const getCollectionRef = () => collection(db, 'artifacts', PATH, 'public', 'data', 'attendance');
 
         let logs = [];
         let filterT = 'ALL';
@@ -169,7 +171,6 @@
         const PRESET = ['文星文理補習班（大社吉的堡）', '鳳翔文理補習班', '麥克亞綸文理補習班'];
         let activeLocs = JSON.parse(localStorage.getItem('sy_locs_geo')) || PRESET;
 
-        // --- UI 控制 ---
         const hide = (id) => document.getElementById(id)?.classList.add('hidden');
         const show = (id) => {
             const el = document.getElementById(id);
@@ -187,17 +188,16 @@
             const isVerified = sessionStorage.getItem('sy_admin_verified') === 'true';
             if (viewName === 'admin' && !isVerified) show('authView');
             else show(viewName + 'View');
+            if (viewName === 'admin') renderAdmin();
         }
 
         function refreshLocUI(selectedValue = null) {
             const options = activeLocs.map(l => `<option value="${l}">${l}</option>`).join('');
-            const m = document.getElementById('locationSelect');
-            const e = document.getElementById('editLoc');
-            m.innerHTML = options;
-            e.innerHTML = options;
+            document.getElementById('locationSelect').innerHTML = options;
+            document.getElementById('editLoc').innerHTML = options;
             if (selectedValue) {
-                m.value = selectedValue;
-                e.value = selectedValue;
+                document.getElementById('locationSelect').value = selectedValue;
+                document.getElementById('editLoc').value = selectedValue;
             }
         }
 
@@ -213,20 +213,15 @@
 
             document.getElementById('successTitle').innerText = title;
             document.getElementById('successTeacher').innerText = teacher ? `${teacher} 老師` : "";
-            
             overlay.classList.remove('hidden');
             card.classList.add('animate-modal-in');
             
             setTimeout(() => {
                 card.classList.replace('animate-modal-in', 'animate-modal-out');
-                setTimeout(() => { 
-                    overlay.classList.add('hidden'); 
-                    card.classList.remove('animate-modal-out'); 
-                }, 300);
+                setTimeout(() => { overlay.classList.add('hidden'); card.classList.remove('animate-modal-out'); }, 300);
             }, 1500);
         }
 
-        // --- 點擊綁定 ---
         document.getElementById('navAdminBtn').onclick = () => switchView('admin');
         document.getElementById('authBackBtn').onclick = () => switchView('punch');
         document.getElementById('addLocBtn').onclick = () => show('locModal');
@@ -250,7 +245,6 @@
             if (document.getElementById('adminPass').value === "860201") {
                 sessionStorage.setItem('sy_admin_verified', 'true');
                 switchView('admin');
-                renderAdmin();
             } else alert("密碼錯誤");
         };
 
@@ -278,13 +272,12 @@
                 } else {
                     payload.timestamp = serverTimestamp();
                     payload.geo = "手動補登";
-                    await addDoc(attendanceRef, payload);
+                    await addDoc(getCollectionRef(), payload);
                     showFeedback(name, "補登成功");
                 }
             } catch (e) { console.error(e); }
         };
 
-        // --- 刪除紀錄新邏輯 ---
         document.getElementById('preDeleteBtn').onclick = () => {
             document.getElementById('preDeleteBtn').classList.add('hidden');
             document.getElementById('doSaveBtn').classList.add('hidden');
@@ -295,26 +288,14 @@
             const id = document.getElementById('editId').value;
             const name = document.getElementById('editName').value;
             if (!id) return;
-            
             try {
-                // 1. 先隱藏 Modal
                 hide('editModal');
-                
-                // 2. 構建文檔引用路徑
                 const docRef = doc(db, 'artifacts', PATH, 'public', 'data', 'attendance', id);
-                
-                // 3. 執行刪除
                 await deleteDoc(docRef);
-                
-                // 4. 顯示成功提示
                 showFeedback(name, "紀錄已刪除", "delete");
-            } catch (e) {
-                console.error("刪除失敗:", e);
-                alert("刪除失敗，請檢查網路狀態");
-            }
+            } catch (e) { console.error(e); }
         };
 
-        // --- 核心打卡 ---
         async function handlePunch(type) {
             const nameEl = document.getElementById('teacherName');
             const name = nameEl.value.trim();
@@ -323,7 +304,7 @@
             
             showFeedback(name, `${type}成功`);
             try {
-                await addDoc(attendanceRef, {
+                await addDoc(getCollectionRef(), {
                     teacher: name,
                     location: document.getElementById('locationSelect').value,
                     type,
@@ -347,11 +328,9 @@
             d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
             document.getElementById('editTime').value = d.toISOString().slice(0, 16);
             
-            // 重設按鈕狀態
             document.getElementById('preDeleteBtn').classList.toggle('hidden', !id);
             document.getElementById('doSaveBtn').classList.remove('hidden');
             document.getElementById('confirmDeleteBtn').classList.add('hidden');
-            
             show('editModal');
         }
 
@@ -366,7 +345,7 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => { filterT = b.dataset.t; renderAdmin(); });
 
             const filtered = filterT === 'ALL' ? logs : logs.filter(l => l.teacher === filterT);
-            list.innerHTML = filtered.map(log => `
+            list.innerHTML = filtered.length ? filtered.map(log => `
                 <div class="glass-effect p-6 rounded-[2rem] border border-white shadow-sm flex justify-between items-center">
                     <div class="space-y-1">
                         <div class="font-black text-slate-800">${log.teacher} <span class="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">${log.type}</span></div>
@@ -374,21 +353,27 @@
                         <div class="text-[9px] text-slate-300 font-mono">${new Date(log.clientTime).toLocaleString('zh-TW', {hour12:false})}</div>
                     </div>
                     <button class="edit-trigger text-xs text-blue-500 font-black px-4 py-3 bg-blue-50 rounded-2xl active:scale-95 transition-transform" data-id="${log.id}">修正</button>
-                </div>`).join('');
+                </div>`).join('') : '<div class="text-center py-20 text-slate-300 font-bold">目前尚無歷史紀錄</div>';
             
             document.querySelectorAll('.edit-trigger').forEach(b => b.onclick = () => openEditModal(b.dataset.id));
         }
 
-        // --- 初始化 ---
         (async () => {
             try {
                 await signInAnonymously(auth);
-                onSnapshot(attendanceRef, (snap) => {
+                
+                // 核心同步邏輯：確保即時監聽並更新全域 logs
+                onSnapshot(getCollectionRef(), (snap) => {
                     logs = [];
                     snap.forEach(d => logs.push({ id: d.id, ...d.data() }));
+                    // 依時間由新到舊排序
                     logs.sort((a, b) => new Date(b.clientTime) - new Date(a.clientTime));
-                    if (sessionStorage.getItem('sy_admin_verified') === 'true') renderAdmin();
-                });
+                    
+                    // 如果目前人在後台，即時重新渲染列表
+                    if (sessionStorage.getItem('sy_admin_verified') === 'true') {
+                        renderAdmin();
+                    }
+                }, (err) => console.error("Snapshot Error:", err));
 
                 if (navigator.geolocation) {
                     navigator.geolocation.watchPosition(pos => {
@@ -404,7 +389,7 @@
                 if (last) document.getElementById('teacherName').value = last;
                 if (sessionStorage.getItem('sy_admin_verified') === 'true') switchView('admin');
 
-            } catch (e) { console.error("初始化失敗:", e); }
+            } catch (e) { console.error("Init Error:", e); }
         })();
     </script>
 </body>
